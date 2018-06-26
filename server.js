@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const logger = require('morgan');
 const port = process.env.PORT || 5000;
 
 // API Routes
@@ -17,6 +19,10 @@ mongoose
     .catch(err => console.log(err));
 
 const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(logger('combined'));
 
 app.get('/', (req, res) => res.send('Hello'));
 
