@@ -22,7 +22,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(logger('combined'));
+app.use(logger('dev'));
 
 app.get('/', (req, res) => res.send('Hello'));
 
