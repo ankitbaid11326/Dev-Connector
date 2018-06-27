@@ -2,7 +2,12 @@ const express = require('express');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const passport = require('passport');
 const router = express.Router();
+
+// Load Input validations
+const validateRegisterInput = require('../../validations/register');
+const validateLoginInput = require('../../validations/login');
 
 const keys = require('../../config/keys');
 // User Model
@@ -17,9 +22,17 @@ router.get('/test', (req, res) => res.json({ msg: 'User Works' }));
 // @desc    Register Users route
 // @access  Public
 router.post('/register', (req, res) => {
+    const { errors, isValid } = validateRegisterInput(req.body);
+
+    // Check Validation
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
     User.findOne({ email: req.body.email }).then(user => {
         if (user) {
-            return res.status(400).json({ email: 'Email Already exists' });
+            errors.email = 'Email already exists';
+            return res.status(400).json(errors);
         } else {
             const avatar = gravatar.url(req.body.email, {
                 s: '200', // SIZE
@@ -52,6 +65,13 @@ router.post('/register', (req, res) => {
 // @desc    Login User / Returning JWT Token
 // @access  Public
 router.post('/login', (req, res) => {
+    const { errors, isValid } = validateLoginInput(req.body);
+
+    // Check Validation
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
     const email = req.body.email;
     const password = req.body.password;
 
@@ -59,7 +79,8 @@ router.post('/login', (req, res) => {
     User.findOne({ email }).then(user => {
         // Check for user exist or not
         if (!user) {
-            return res.status(404).json({ email: 'User not found' });
+            errors.email = 'User not found';
+            return res.status(404).json(errors);
         }
 
         // Check Password
@@ -80,10 +101,18 @@ router.post('/login', (req, res) => {
                     });
                 });
             } else {
-                return res.status(400).json({ password: 'Password incorrect' });
+                errors.password = 'Password incorrect';
+                return res.status(400).json(errors);
             }
         });
     });
+});
+
+// @route   GET api/users/current
+// @desc    Return current user
+// @access  Private
+router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
+    res.json(req.user);
 });
 
 module.exports = router;
