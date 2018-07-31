@@ -28,7 +28,7 @@ class PostItem extends Component {
     }
 
     render() {
-        const { post, auth } = this.props;
+        const { post, auth, showActions } = this.props;
 
         return (
             <div className="card card-body mb-3">
@@ -84,6 +84,10 @@ class PostItem extends Component {
     }
 }
 
+PostItem.defaultProps = {
+    showActions: true
+};
+
 PostItem.propTypes = {
     deletePost: PropTypes.func.isRequired,
     addLike: PropTypes.func.isRequired,
@@ -98,5 +102,5 @@ const mapStateToProps = state => ({
 
 export default connect(
     mapStateToProps,
-    { deletePost }
+    { deletePost, addLike, removeLike }
 )(PostItem);
